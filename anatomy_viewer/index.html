@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anatomy GLB Viewer (Three.js)</title>
+
+    <!-- 🔹 Minimal icon sprite: only the icons we actually use -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="i-fit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+        <line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>
+      </symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="21"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.54 6.46-1.41-1.41M6.87 6.87 5.46 5.46m12.02 0-1.41 1.41M6.87 17.13l-1.41 1.41"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </symbol>
+      <symbol id="i-focus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4M21 15v4a2 2 0 0 1-2 2h-4"/>
+      </symbol>
+      <symbol id="i-xray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M7 8h10M7 12h10M7 16h6"/>
+      </symbol>
+      <symbol id="i-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.11 1 12c.46-1.09 1.11-2.12 1.93-3.06M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-3.42"/>
+        <path d="M22.54 11.88A10.94 10.94 0 0 0 12 4c-1.33 0-2.6.23-3.78.66"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
+      </symbol>
+      <symbol id="i-unhide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12S5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="8"/>
+      </symbol>
+    </svg>
+
+    <style>
+      :root {
+        --header-h: 56px;
+        --surface: #0b1220;
+        --surface-2: #0f172a;
+        --on-surface: #e2e8f0;
+        --muted: #94a3b8;
+        --brand: #7c3aed;
+        --brand-2: #22d3ee;
+        --ring: rgba(124,58,237,.45);
+        --br: 14px;
+        --shadow: 0 10px 30px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.25);
+      }
+      html, body { height: 100%; margin: 0; background: radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.15), transparent), radial-gradient(1000px 500px at 90% 10%, rgba(34,211,238,.12), transparent), var(--surface-2); color: var(--on-surface); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, sans-serif; }
+
+      /* ---------- Header ---------- */
+      header {
+        position: fixed; inset: 0 0 auto 0; height: var(--header-h);
+        display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(148,163,184,.18);
+        background: color-mix(in srgb, rgba(2,6,23,.65) 70%, transparent);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: none;
+        z-index: 20;
+      }
+      header h1 { font-size: 15px; margin: 0; font-weight: 800; letter-spacing: .2px; display:flex; align-items:center; gap:10px; }
+      .dot { width:10px; height:10px; border-radius:50%; background: linear-gradient(135deg,var(--brand),var(--brand-2)); box-shadow: 0 0 10px var(--brand), 0 0 20px var(--brand-2); }
+      .hint { opacity: .85; font-size: 12px; }
+      .controls { display: flex; gap: 8px; align-items:center; }
+
+      /* ---------- Buttons ---------- */
+      .btn { appearance: none; border: 1px solid rgba(148,163,184,.25); background: linear-gradient(180deg, rgba(15,23,42,.8), rgba(15,23,42,.6)); color: var(--on-surface); padding: 7px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; display:inline-flex; align-items:center; gap:8px; transition: transform .04s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
+      .btn:hover { background: linear-gradient(180deg, rgba(30,41,59,.92), rgba(15,23,42,.7)); border-color: rgba(148,163,184,.4); }
+      .btn:active { transform: translateY(1px); }
+      .btn:focus-visible { outline: 0; box-shadow: 0 0 0 3px var(--ring); }
+      .btn.ghost { background: transparent; border-color: rgba(148,163,184,.18); }
+      .btn.primary { border-color: transparent; background: linear-gradient(135deg, rgba(124,58,237,.9), rgba(34,211,238,.85)); color:#0b1220; font-weight:700; }
+      .btn.small { padding: 5px 9px; border-radius: 10px; font-size: 11px; }
+      .icon{width:16px;height:16px;display:inline-block;flex:0 0 auto}
+.btn .icon{width:16px;height:16px}
+
+      /* ---------- Canvas ---------- */
+      #canvas {
+        position: fixed; left: 0; right: 0; top: var(--header-h); bottom: 0;
+        width: 100vw; height: calc(100vh - var(--header-h)); display: block; outline: none;
+      }
+
+      /* ---------- Floating Panel ---------- */
+      #panel {
+        position: fixed; left: 16px; top: calc(var(--header-h) + 14px);
+        width: 300px; max-height: 64vh; overflow: auto;
+        background: linear-gradient(180deg, rgba(2,6,23,.84), rgba(2,6,23,.7));
+        border: 1px solid rgba(148,163,184,.22);
+        border-radius: var(--br); padding: 12px 12px 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: none;
+        box-shadow: var(--shadow);
+      }
+      #panel h3 { margin: 0 0 8px; font-size: 13px; font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
+      #selName { font-weight: 800; color: #c7d2fe; font-size: 15px; }
+      #selPath { font-size: 12px; opacity: .9; color: var(--muted); word-break: break-word; }
+      .row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+      .kbd { padding: 2px 6px; border: 1px solid rgba(148,163,184,.35); border-radius: 6px; font-size: 11px; background: rgba(15,23,42,.6); }
+      .tip { margin-top: 10px; font-size: 12px; color: var(--muted); display:flex; align-items:center; gap:8px; }
+
+      /* ---------- Utility badges ---------- */
+      .badge { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius: 999px; font-size:11px; border:1px solid rgba(148,163,184,.25); background: rgba(15,23,42,.65); }
+
+      /* ---------- Footer ---------- */
+      footer { position: fixed; right: 14px; bottom: 12px; font-size: 12px; opacity: .8; display:flex; align-items:center; gap:8px; }
+
+      /* ---------- Collapsible (for future layers list) ---------- */
+      details.layers { margin-top: 10px; border-top: 1px dashed rgba(148,163,184,.25); padding-top: 10px; }
+      details.layers > summary { cursor: pointer; font-size: 12px; list-style: none; display:flex; align-items:center; gap:8px; color: var(--muted); }
+      details.layers[open] > summary { color: var(--on-surface); }
+
+      /* ---------- Responsive ---------- */
+      @media (max-width: 880px) {
+        #panel { width: min(92vw, 380px); }
+        .hint { display:none; }
+        .controls { gap:6px; }
+        .btn { padding: 6px 9px; }
+      }
+    </style>
+
+    <!-- import map ให้ 'three' resolve ได้ใน loaders/controls -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <span class="dot" aria-hidden="true"></span>
+        Anatomy GLB Viewer
+        <span class="badge" title="Scene info">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <span id="sceneMeta">Ready</span>
+        </span>
+      </h1>
+
+      <div class="hint">Orbit: drag • Zoom: wheel • Pan: right-drag • Select: click</div>
+
+      <div class="controls">
+        <button class="btn ghost small" id="btnTheme" title="Toggle theme">
+          <svg class="icon" aria-hidden="true"><use id="themeIcon" href="#i-moon"/></svg>
+          Theme
+        </button>
+        <button class="btn" id="btnFit">
+          <svg class="icon" aria-hidden="true"><use href="#i-fit"/></svg>
+          Fit to view
+        </button>
+        <button class="btn" id="btnReset">
+          <svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg>
+          Reset camera
+        </button>
+        <label class="btn primary" for="file">
+          <svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg>
+          Load .glb
+        </label>
+        <input id="file" type="file" accept=".glb" style="display:none" />
+      </div>
+    </header>
+
+    <canvas id="canvas" tabindex="0" aria-label="Three.js viewport"></canvas>
+
+    <div id="panel" role="complementary" aria-label="Selection panel">
+      <h3>
+        <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+        Selected
+      </h3>
+      <div id="selName">—</div>
+      <div id="selPath"></div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn small" id="btnFitSel" title="Fit to selected (F)">
+          <svg class="icon" aria-hidden="true"><use href="#i-focus"/></svg>
+          Fit (F)
+        </button>
+        <button class="btn small" id="btnXray" title="X-ray others (X)">
+          <svg class="icon" aria-hidden="true"><use href="#i-xray"/></svg>
+          X-ray (X)
+        </button>
+        <button class="btn small" id="btnHide" title="Hide selected (H)">
+          <svg class="icon" aria-hidden="true"><use href="#i-hide"/></svg>
+          Hide (H)
+        </button>
+        <button class="btn small" id="btnUnhide" title="Unhide all (U)">
+          <svg class="icon" aria-hidden="true"><use href="#i-unhide"/></svg>
+          Unhide (U)
+        </button>
+      </div>
+
+      <div class="tip">
+        <span class="kbd">Click</span> select • <span class="kbd">Hover</span> highlight • <span class="kbd">F / X / H / U</span> shortcuts
+      </div>
+
+      <!-- reserve for future: layers list / search without breaking main.js -->
+      <details class="layers">
+        <summary>
+          <svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>
+          Layers / Scene graph (preview)
+        </summary>
+        <div class="small" style="opacity:.9; margin-top:6px;">This section is decorative for now and won't interfere with your current main.js. You can populate it later.</div>
+      </details>
+    </div>
+
+    <footer>
+      <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+      <span id="info"></span>
+    </footer>
+
+    <!-- Optional: tiny theme toggle without touching your main.js logic -->
+    <script>
+      (function(){
+        const btn = document.getElementById('btnTheme');
+        const icon = document.getElementById('themeIcon');
+        let dark = true;
+        function apply(){
+          document.documentElement.style.setProperty('--surface-2', dark ? '#0f172a' : '#f8fafc');
+          document.documentElement.style.setProperty('--on-surface', dark ? '#e2e8f0' : '#0b1220');
+          document.documentElement.style.setProperty('--muted', dark ? '#475569' : '#64748b');
+          icon.setAttribute('href', dark ? '#i-moon' : '#i-sun');
+        }
+        apply();
+        btn?.addEventListener('click', ()=>{ dark = !dark; apply(); });
+      })();
+    </script>
+
+    <!-- Keep your existing app logic isolated -->
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
